@@ -1,15 +1,12 @@
-import tornado.ioloop
-import tornado.web
-import cont
-
-class Main(tornado.web.RequestHandler):
-    def get(self):
-        self.write('Hello Tornado')
+from tornado import web, ioloop
+import os
+import controllers
 
 if __name__ == '__main__':
-    app = tornado.web.Application([
-        ('/', Main)
-    ])
+    app = web.Application(
+        controllers.getRouting(),
+        template_path=os.path.join(os.path.dirname(__file__), 'views')
+    )
 
     app.listen(8888)
-    tornado.ioloop.IOLoop.instance().start()
+    ioloop.IOLoop.instance().start()
