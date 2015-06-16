@@ -81,31 +81,31 @@ class Index(tornado.web.RequestHandler):
 
 class BenchMongoDB(tornado.web.RequestHandler):
 
-    @tornado.gen.coroutine
-    def get():
+    #@tornado.gen.coroutine
+    def get(self):
         pass
 
-    @tornado.gen.coroutine
-    def post():
+    #@tornado.gen.coroutine
+    def post(self):
         pass
 
-    @tornado.gen.coroutine
-    def delete():
+    #@tornado.gen.coroutine
+    def delete(self):
         pass
 
 
-class BenchRethinkDB(tornado.web.Requesthandler):
+class BenchRethinkDB(tornado.web.RequestHandler):
 
-    @tornado.gen.coroutine
-    def get():
+    #@tornado.gen.coroutine
+    def get(self):
         pass
 
-    @tornado.gen.coroutine
-    def post():
+    #@tornado.gen.coroutine
+    def post(self):
         pass
 
-    @tornado.gen.coroutine
-    def delete():
+    #@tornado.gen.coroutine
+    def delete(self):
         pass
 
 
@@ -114,6 +114,12 @@ if __name__ == '__main__':
     #We use event loop of asyncio instead of tornado IOLoop
     AsyncIOMainLoop().install()
     tornado.options.parse_command_line()
+    mongo = m.Connection('localhost', 27017)
+    rethink = r.connect(host='localhost', port=28015)
+    db = {
+        'm': mongo,
+        'r': rethink
+    }
     app = tornado.web.Application(handlers=[
         ('/', Index),
         ('/mongo', BenchMongoDB),
