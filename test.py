@@ -11,6 +11,8 @@ __version__ = '1.0.0'
 __date__ = '10 Jun 2015'
 
 import asyncio
+import pymongo as m
+import rethinkdb as r
 from tornado.platform.asyncio import AsyncIOMainLoop
 import tornado.httpserver
 import tornado.httpclient
@@ -77,15 +79,46 @@ class Index(tornado.web.RequestHandler):
         return 'c'
 
 
+class BenchMongoDB(tornado.web.RequestHandler):
+
+    @tornado.gen.coroutine
+    def get():
+        pass
+
+    @tornado.gen.coroutine
+    def post():
+        pass
+
+    @tornado.gen.coroutine
+    def delete():
+        pass
+
+
+class BenchRethinkDB(tornado.web.Requesthandler):
+
+    @tornado.gen.coroutine
+    def get():
+        pass
+
+    @tornado.gen.coroutine
+    def post():
+        pass
+
+    @tornado.gen.coroutine
+    def delete():
+        pass
+
+
 if __name__ == '__main__':
 
     #We use event loop of asyncio instead of tornado IOLoop
     AsyncIOMainLoop().install()
     tornado.options.parse_command_line()
     app = tornado.web.Application(handlers=[
-        ('/', Index)
+        ('/', Index),
+        ('/mongo', BenchMongoDB),
+        ('/rethink', BenchRethinkDB)
     ])
     http_server = tornado.httpserver.HTTPServer(app)
     http_server.listen(options.port)
-    #tornado.ioloop.IOLoop().instance().start()
     asyncio.get_event_loop().run_forever()
