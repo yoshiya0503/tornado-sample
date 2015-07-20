@@ -16,11 +16,13 @@ from tornado.options import define, options
 
 define('port', default=8000, help='port number', type=int)
 
-
 class BaseHandler(web.RequestHandler):
 
     def initialize(self):
         print('call init')
+
+    def get_current_user(self):
+        return self.get_secure_cookie('user_name')
 
     def set_default_headers(self):
         self.add_header('version', '1.0.0')
@@ -32,19 +34,31 @@ class BaseHandler(web.RequestHandler):
 
 class TestHandler(BaseHandler):
 
+    @web.authenticated
     def get(self):
         print(self._headers)
         self.write('end request')
 
+
+class LoginHandler(web.RequestHandler):
+
+    def get(self):
+        self.write('login page')
 
 if __name__ == '__main__':
 
     AsyncIOMainLoop().install()
     options.parse_command_line()
 
+    settings = {
+        'login_url': '/login',
+        'cookie_secret': 'hoge'
+    }
+
     application = web.Application([
-        ('/', TestHandler)
-    ])
+        ('/', TestHandler),
+        ('/login', LoginHandler)
+    ], **settings)
 
     server = httpserver.HTTPServer(application)
     server.listen(options.port)
