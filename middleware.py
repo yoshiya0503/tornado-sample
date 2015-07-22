@@ -15,6 +15,8 @@ from tornado import httpserver, web
 from tornado.options import define, options
 
 define('port', default=8000, help='port number', type=int)
+define('conf', default='local.py', help='config', type=str)
+define('test', type=int)
 
 class BaseHandler(web.RequestHandler):
 
@@ -49,6 +51,10 @@ if __name__ == '__main__':
 
     AsyncIOMainLoop().install()
     options.parse_command_line()
+    options.parse_config_file(options.conf)
+    print(options.conf)
+    print(options.port)
+    print(options.test)
 
     settings = {
         'login_url': '/login',
