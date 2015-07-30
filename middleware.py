@@ -10,6 +10,7 @@ __date__ = '02 Jul 2015'
 
 import asyncio
 import aiohttp
+import time
 from contextlib import contextmanager
 from functools import wraps
 from tornado.platform.asyncio import AsyncIOMainLoop
@@ -45,7 +46,7 @@ class TestHandler(BaseHandler):
         print(self._headers)
         self.write('end request')
 
-class TestWith(web.RequestHandler):
+class TestAsyncWith(web.RequestHandler):
 
     @coroutine
     def get(self):
@@ -56,6 +57,7 @@ class TestWith(web.RequestHandler):
     def async_check(self):
         e = asyncio.get_event_loop()
         def hoge():
+            time.sleep(1)
             return 'hoge'
         result = yield from e.run_in_executor(None, hoge)
 
@@ -63,6 +65,18 @@ class TestWith(web.RequestHandler):
         def check():
             yield result
         return check()
+
+class TestWith(web.RequestHandler):
+
+    def get(self):
+        with self.check() as body:
+            print(body)
+
+    @contextmanager
+    def check(self):
+        time.sleep(1)
+        yield 'hoge'
+
 
 class LoginHandler(web.RequestHandler):
 
@@ -86,7 +100,8 @@ if __name__ == '__main__':
     application = web.Application([
         ('/', TestHandler),
         ('/login', LoginHandler),
-        ('/with', TestWith)
+        ('/with', TestWith),
+        ('/asyncwith', TestAsyncWith)
     ], **settings)
 
     server = httpserver.HTTPServer(application)
