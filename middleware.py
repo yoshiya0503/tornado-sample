@@ -9,9 +9,13 @@ __version__ = '0.0.1'
 __date__ = '02 Jul 2015'
 
 import asyncio
+import aiohttp
+from contextlib import contextmanager
 from functools import wraps
 from tornado.platform.asyncio import AsyncIOMainLoop
 from tornado import httpserver, web
+from tornado.httpclient import AsyncHTTPClient
+from tornado.gen import coroutine
 from tornado.options import define, options
 
 define('port', default=8000, help='port number', type=int)
@@ -41,6 +45,24 @@ class TestHandler(BaseHandler):
         print(self._headers)
         self.write('end request')
 
+class TestWith(web.RequestHandler):
+
+    @coroutine
+    def get(self):
+        with (yield from self.async_check()) as body:
+            print(body)
+
+    @asyncio.coroutine
+    def async_check(self):
+        e = asyncio.get_event_loop()
+        def hoge():
+            return 'hoge'
+        result = yield from e.run_in_executor(None, hoge)
+
+        @contextmanager
+        def check():
+            yield result
+        return check()
 
 class LoginHandler(web.RequestHandler):
 
@@ -63,7 +85,8 @@ if __name__ == '__main__':
 
     application = web.Application([
         ('/', TestHandler),
-        ('/login', LoginHandler)
+        ('/login', LoginHandler),
+        ('/with', TestWith)
     ], **settings)
 
     server = httpserver.HTTPServer(application)
