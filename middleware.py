@@ -11,6 +11,7 @@ __date__ = '02 Jul 2015'
 import asyncio
 import aiohttp
 import time
+from datetime import datetime
 from contextlib import contextmanager
 from functools import wraps
 from tornado.platform.asyncio import AsyncIOMainLoop
@@ -18,10 +19,20 @@ from tornado import httpserver, web
 from tornado.httpclient import AsyncHTTPClient
 from tornado.gen import coroutine
 from tornado.options import define, options
+from tornado.stack_context import StackContext, NullContext
 
 define('port', default=8000, help='port number', type=int)
 define('conf', default='local.py', help='config', type=str)
 define('test', type=int)
+
+t = 0
+
+@contextmanager
+def calc_time():
+    global t
+    t = 1
+    yield
+
 
 class BaseHandler(web.RequestHandler):
 
@@ -51,15 +62,22 @@ class TestAsyncWith(web.RequestHandler):
     @coroutine
     def get(self):
         with (yield from self.async_check()) as body:
-            print(body)
+            pass
+            #print(body)
 
     @asyncio.coroutine
     def async_check(self):
         e = asyncio.get_event_loop()
         def hoge():
+            global t
             time.sleep(1)
+            t = t + 100
             return 'hoge'
-        result = yield from e.run_in_executor(None, hoge)
+        result = None
+        #with StackContext(calc_time):
+        with calc_time():
+            result = yield from e.run_in_executor(None, hoge)
+        print(t)
 
         @contextmanager
         def check():
